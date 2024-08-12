@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo apt install -y mpv curl grep sed aria2 yt-dlp ffmpeg fzf 

@@ -1,0 +1,212 @@
+#!/bin/bash
+
+outputDir="./output/"
+outputFileName="output.txt"
+
+filePath="${outputDir}${outputFileName}"
+
+
+# definition of all the regexes to be used
+# unicode doesn't work
+#devNagriRegex="[ \x{0900}- \x{097F}'ऄऍऎऒऑऔऺऻक़ख़ग़ज़ड़ढ़फ़य़ॠॡॢॣ॰]"
+
+devNagriRegex="[कखगघङचछजझञटठडढणतथदध्नपफबभमयरलवशषसहक्षत्रज्ञअआइईउऊऋएऐओऔ अंअःािीुूृेएंऐंओंऔंःंँः़॒॑ऺ्ॠॅळव़श़ष्ह़ऽₓ]"
+letterRegex="[a-zA-Z]"
+numberRegex="[0-9]"
+puncRegex="[[:punct:]]"
+phoneNumberRegex='^(\+91|0)?[789][0-9]{9}$'
+mathExpressionRegex="([a-z0-9]+)[ ]?[+-\/\*][ ]?([a-z0-9]+)[ ]?([=]([a-z0-9]+))?"
+dateRegex='^([0-9]{1,2})[/-]([0-9]{1,2})[/-]([0-9]{4})$'
+emailRegex='([[:alnum:]_.-]+@[[:alnum:]_.-]+?\.[[:alpha:].]{2,6})'
+wordNumberRegex="^one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|lakh$"
+dayPosition="[0-9]{1,}th"
+
+
+# functions
+quantifyWords() {
+
+	# the function will
+	# return 1 if the word is a number
+	# return 2 if the word is a date / position
+	# return -66 if the input is invalid or unidentified
+
+
+	word="$1"
+
+	if [[ $word =~ $wordNumberRegex ]]
+	then
+		echo 1
+	elif [[ $word =~ $dayPosition ]]
+	then
+		echo 2
+	else
+		echo -66
+	fi
+
+}
+
+
+
+quantifyNumbers() {
+
+	# the function will
+	# return 1 if the number is a phone number
+	# return -66 if the input is invalid or unidentified
+
+
+	local number="$1"
+
+	# echo "$number"
+
+	if [[ $number =~ $phoneNumberRegex  ]]
+	then
+		echo -n 1
+		
+	else
+		echo -n  -66
+	fi
+
+}
+
+
+quantifySymbols() {
+
+	# the function will
+	# return 1 for date
+	# return 2 if the input is a mathematical expression
+	# return 3 if the input is an email
+	# return 4 if the input is detected as a number
+	# return -66 if the input is invalid or unidentified
+
+
+	local symbol="$1"
+
+	if [[ $symbol =~ $dateRegex ]]
+	then
+		echo -n "1"
+
+	elif [[ $symbol =~ $phoneNumberRegex ]]
+	then
+		echo -n "4"
+
+	elif [[ $symbol =~ $emailRegex ]]
+	then
+		echo -n "3"
+
+	elif [[ $symbol =~ $mathExpressionRegex ]]
+	then
+		echo -n "2"
+	else
+		echo -n "-66"
+
+	fi
+
+
+
+}
+
+
+
+# unify every text file into one
+cat ./*.txt > unified
+
+
+# create a directory
+mkdir -p "$outputDir"
+echo "" > "$filePath"
+
+# cleanup 
+[ -f $filePath ] &&  rm $filePath
+
+
+
+# creating a susshell and backgrounding the process
+# (
+	while read -r line 
+	do
+
+		for word in $line;
+		do
+			# echo $word
+		
+			if [[ "$word" =~ $devNagriRegex ]]
+			then
+				echo "${word} (Devnagri Character)" >> $filePath &
+
+			elif [[ "$word" =~ $puncRegex ]]
+			then
+				#  echo "symbols detected"
+				quantifiedSymbols=$(quantifySymbols "$word")
+		
+				case "$quantifiedSymbols" in
+					"1")
+						echo "${word} (Date)" >> $filePath &
+
+						;;
+					"2")
+						echo "${word} (Mathematical expression)" >> $filePath &
+
+						;;
+					"3")
+						echo "${word} (Email)" >> $filePath &
+
+						;;
+					"4")
+						echo "${word} (Phone Number)" >> $filePath &
+
+						;;
+		
+					-66)
+						echo "${word} (Symbol)" >> $filePath &
+
+						;;
+				esac
+			
+			elif [[ "$word" =~ $letterRegex ]]
+			then
+				quantifiedWord=$(quantifyWords "$word")
+
+				case "$quantifiedWord" in
+
+					1)
+						echo "${word} (Number)" >> $filePath &
+						;;
+
+					2)
+						echo "${word} (Day/Position)" >> $filePath &
+						;;
+
+					-66)
+						echo "${word} (Word)" >> $filePath &
+						;;
+				esac
+		
+
+
+			elif [[ "$word" =~ $numberRegex ]]
+			then
+				quantifiedNumber=$(quantifyNumbers "$word" )
+		
+				case "$quantifiedNumber" in
+					"1")
+						echo "${word} (Phone Number)" >> $filePath &
+						;;
+					-66)
+						# command ...
+						echo "${word} (Number)" >> $filePath &
+						;;
+				esac
+			else
+				echo "${word} (UnIdentified)" >> $filePath &
+
+			fi
+			done
+	done < unified & # background the while loop ( the echo statements inside the while loop are also multi threaded)
+# ) &
+echo "Done"
+echo "The file will be saved in the directory $outputDir"
+echo "This can take a while if the size of input files are too long"
+echo "The file path is $filePath"
+
+#cleanup
+rm ./unified
