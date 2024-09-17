@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# LAB 3 is quantifying words
+# lab 5 is quantifying words but using multi threading
 
 outputDir="./output/"
 outputFileName="output.txt"
@@ -133,7 +133,7 @@ echo "" > "$filePath"
 		
 			if [[ "$word" =~ $devNagriRegex ]]
 			then
-				echo "${word} (Devnagri Character)" >> $filePath 
+				echo "${word} (Devnagri Character)" >> $filePath &
 
 			elif [[ "$word" =~ $puncRegex ]]
 			then
@@ -142,24 +142,24 @@ echo "" > "$filePath"
 		
 				case "$quantifiedSymbols" in
 					"1")
-						echo "${word} (Date)" >> $filePath 
+						echo "${word} (Date)" >> $filePath &
 
 						;;
 					"2")
-						echo "${word} (Mathematical expression)" >> $filePath 
+						echo "${word} (Mathematical expression)" >> $filePath &
 
 						;;
 					"3")
-						echo "${word} (Email)" >> $filePath 
+						echo "${word} (Email)" >> $filePath &
 
 						;;
 					"4")
-						echo "${word} (Phone Number)" >> $filePath 
+						echo "${word} (Phone Number)" >> $filePath &
 
 						;;
 		
 					-66)
-						echo "${word} (Symbol)" >> $filePath 
+						echo "${word} (Symbol)" >> $filePath &
 
 						;;
 				esac
@@ -171,15 +171,15 @@ echo "" > "$filePath"
 				case "$quantifiedWord" in
 
 					1)
-						echo "${word} (Number)" >> $filePath 
+						echo "${word} (Number)" >> $filePath &
 						;;
 
 					2)
-						echo "${word} (Day/Position)" >> $filePath 
+						echo "${word} (Day/Position)" >> $filePath &
 						;;
 
 					-66)
-						echo "${word} (Word)" >> $filePath 
+						echo "${word} (Word)" >> $filePath &
 						;;
 				esac
 		
@@ -191,20 +191,20 @@ echo "" > "$filePath"
 		
 				case "$quantifiedNumber" in
 					"1")
-						echo "${word} (Phone Number)" >> $filePath 
+						echo "${word} (Phone Number)" >> $filePath &
 						;;
 					-66)
 						# command ...
-						echo "${word} (Number)" >> $filePath 
+						echo "${word} (Number)" >> $filePath &
 						;;
 				esac
 			else
-				echo "${word} (UnIdentified)" >> $filePath 
+				echo "${word} (UnIdentified)" >> $filePath &
 
 			fi
 			done
-	done < unified  # background the while loop ( the echo statements inside the while loop are also multi threaded)
-
+	done < unified & # background the while loop ( the echo statements inside the while loop are also multi threaded)
+# ) &
 echo "Done"
 echo "The file will be saved in the directory $outputDir"
 echo "This can take a while if the size of input files are too long"
