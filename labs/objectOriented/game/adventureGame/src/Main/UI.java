@@ -50,7 +50,7 @@ public class UI {
 
     // Player UI
     JPanel lifePanel;
-   public JLabel lifeLabel[] = new JLabel[6];
+    public JLabel lifeLabel[] = new JLabel[6];
     JPanel inventoryPanel;
     public JLabel weaponLabel, gearLabel;
 
@@ -87,6 +87,8 @@ public class UI {
             i++;
         }
         i = 2;
+
+    
 
         inventoryPanel = new JPanel();
         inventoryPanel.setBounds(850, 0, 100, 50);
@@ -295,7 +297,7 @@ public class UI {
 
     }
 
-    public void createArrowButton(int bgNum, int x, int y, int width, int height, String arrowFileName,
+    public void makeArrow(int bgNum, int x, int y, int width, int height, String arrowFileName,
             String command) {
         ImageIcon arrowIcon = new ImageIcon(getClass().getClassLoader().getResource(arrowFileName));
 
@@ -323,7 +325,7 @@ public class UI {
         createObject(1, 100, houseObjY - 100, 300, 400, imagePaths.get("gojo"), "Look", "Talk", "Attack", "lookGojo",
                 "talkGojo", "attackGojo");
 
-        createArrowButton(1, 0, 250, 100, 100, imagePaths.get("arrowIcon"), "goScene2");
+        makeArrow(1, 0, 250, 100, 100, imagePaths.get("arrowIcon"), "goScene2");
 
         bgPanel[1].add(bgLabel[1]);
 
@@ -333,7 +335,7 @@ public class UI {
         createObject(2, houseObjX + 80, houseObjY + 80, 200, 200, imagePaths.get("flyingGear"), "Look", "Talk",
                 "Equip Gear", "lookGear", "talkGear", "equipGear");
 
-        createArrowButton(2, bgWidth, 300, 100, 100, imagePaths.get("arrowIconRight"), "goScene2");
+        makeArrow(2, bgWidth, 300, 100, 100, imagePaths.get("arrowIconRight"), "goScene2");
 
         bgPanel[2].add(bgLabel[2]);
 
